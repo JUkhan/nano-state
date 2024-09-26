@@ -1,0 +1,23 @@
+{
+  "name": "@jukhan/nano-state",
+  "description": "A nano size react state management lib",
+  "private": false,
+  "version": "0.0.4",
+  "main": "index.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JUkhan/nano-state.git"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "Jasim Khan<jasim.uddin.khan@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JUkhan/nano-state/issues"
+  },
+  "homepage": "https://github.com/JUkhan/nano-state#readme"
+}
