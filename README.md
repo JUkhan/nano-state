@@ -49,7 +49,11 @@ const Counter: React.FC = () => {
     const {count, loading} = useSelector(state => state.counter);
     
     const decrement = () => {
-        write(state => ({ counter: { count: state.counter.count! - 1, loading: false } }));
+        write(state =>{
+            const counter={...state.counter};
+            counter.count--;
+            return {counter}
+        });
     };
     const increment = () => {
         write(state => ({ counter: { count: state.counter.count! + 1, loading: false } }));
@@ -96,19 +100,15 @@ const Todo: React.FC = () => {
 
     const addTodo = () => {
         if (newTodo.trim()) {
-            write(state => ({
-                todos: {
-                    ...state.todos,
-                    items: [
-                        ...state.todos.items,
-                        {
-                            id: Date.now(),
-                            text: newTodo.trim(),
-                            completed: false
-                        }
-                    ]
-                }
-            }));
+            write(state => {
+                const todos={...state.todos};
+                todos.items.push({
+                    id: Date.now(),
+                    text: newTodo.trim(),
+                    completed: false
+                });
+                return {todos}
+            });
             setNewTodo('');
         }
     };
