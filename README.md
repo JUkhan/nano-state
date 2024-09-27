@@ -54,13 +54,13 @@ const decrement = () => {
 };
 
 const increment = () => {
-    write(state => ({ counter: { count: state.counter.count! + 1, loading: false } }));
+    write(state => ({ counter: { count: state.counter.count + 1, loading: false } }));
 };
 
 const asyncInc = () => {
     write(state => ({ counter: { ...state.counter, loading: true } }));
     setTimeout(() => {
-        write(state => ({ counter: { count: state.counter.count! + 1, loading: false } }));
+        write(state => ({ counter: { count: state.counter.count + 1, loading: false } }));
     }, 1000);
 }
 
@@ -110,7 +110,7 @@ const addTodo = () => {
             }];
             return { todos }
         });
-        write(state => ({ newTodo: '' }));
+        write({ newTodo: '' });
     }
 };
 
@@ -118,7 +118,7 @@ const toggleTodo = (id: number) => {
     write(state => ({
         todos: {
             ...state.todos,
-            items: state.todos.items!.map(todo =>
+            items: state.todos.items.map(todo =>
                 todo.id === id ? { ...todo, completed: !todo.completed } : todo
             )
         }
@@ -152,7 +152,7 @@ const Todo: React.FC = () => {
                 <Input
                     type="text"
                     value={newTodo}
-                    onChange={(e) => write(state => ({ newTodo: e.target.value }))}
+                    onChange={(e) => write({ newTodo: e.target.value })}
                     placeholder="Add new todo"
                 />
                 <Button onClick={addTodo}>Add</Button>
