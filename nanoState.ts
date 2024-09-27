@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'npm:react@~18.0.0';
 
 function is(x: unknown, y: unknown) {
     if (x === y) {
@@ -37,6 +37,34 @@ function shallowEqual(objA: any, objB: any) {
     return true;
 }
 
+/**
+ * Creates a state management system for a given initial value.
+ * 
+ * @param initialValue - The initial state value of type T.
+ * @returns An object containing methods to read, write, dispatch actions, and use selectors and effects.
+ * 
+ * @template T - The type of the state object.
+ * 
+ * @example
+ * const { read, write, dispatch, useStoreEffect, useSelector } = createState({ count: 0 });
+ * 
+ * // Reading the state
+ * const currentState = read();
+ * 
+ * // Writing to the state
+ * write(state => ({ count: state.count + 1 }));
+ * 
+ * // Dispatching an action
+ * dispatch({ type: 'INCREMENT' });
+ * 
+ * // Using a selector
+ * const count = useSelector(state => state.count);
+ * 
+ * // Using store effect
+ * useStoreEffect(action => action.type === 'INCREMENT', action => {
+ *     console.log('Increment action dispatched:', action);
+ * });
+ */
 export function createState<T extends object>(initialValue: T): {
     read: () => T;
     write: (fn: (state: T) => Partial<T>) => void;
@@ -65,7 +93,7 @@ export function createState<T extends object>(initialValue: T): {
             const unsubscribe = subscribe((newValue: T) => {
                 const selectedValue = selector(newValue);
                 if (!shallowEqual(selectedValue, value)) {
-                    setValue(_ => selectedValue);
+                    setValue((ols: S) => selectedValue);
                 }
             });
             return () => {

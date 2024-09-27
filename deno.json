@@ -1,0 +1,7 @@
+{
+  "name": "@react/nano-state",
+  "version": "0.1.0",
+  "license":"ISC",
+  "exports": "./nanoState.ts",
+  "imports": { "react": "npm:react@~18.0.0" }
+}
