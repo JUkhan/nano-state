@@ -89,7 +89,7 @@ export function createState<T extends object>(initialValue: T): {
         React.useEffect(() => subscribe((newValue: T) => {
             const selectedValue = selector(newValue);
             if (!shallowEqual(selectedValue, slice.current)) {
-                forcrRender((prev) => (prev + 1) % Number.MAX_SAFE_INTEGER);
+                forcrRender((prev: number) => (prev + 1) % Number.MAX_SAFE_INTEGER);
                 slice.current = selectedValue;
             }
         }), []);
