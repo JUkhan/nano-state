@@ -1,5 +1,6 @@
 import React from 'npm:react@~18.0.0';
 
+
 function is(x: unknown, y: unknown) {
     if (x === y) {
         return x !== 0 || y !== 0 || 1 / x === 1 / y;
@@ -37,22 +38,23 @@ function shallowEqual(objA: any, objB: any) {
     return true;
 }
 
+
 /**
  * Creates a state management system for a given initial value.
  * 
  * @param initialValue - The initial state value of type T.
- * @returns An object containing methods to read, write, dispatch actions, and use selectors and effects.
+ * @returns An object containing methods to getState, setState, dispatch actions, and use selectors and effects.
  * 
  * @template T - The type of the state object.
  * 
  * @example
- * const { read, write, dispatch, useStoreEffect, useSelector } = createState({ count: 0 });
+ * const { getState, setState, dispatch, useStateEffect, useSelector, select } = createState({ count: 0 });
  * 
  * // Reading the state
- * const currentState = read();
+ * const currentState = getState();
  * 
  * // Writing to the state
- * write(state => ({ count: state.count + 1 }));
+ * setState(state => ({ count: state.count + 1 }));
  * 
  * // Dispatching an action
  * dispatch({ type: 'INCREMENT' });
@@ -60,23 +62,24 @@ function shallowEqual(objA: any, objB: any) {
  * // Using a selector
  * const count = useSelector(state => state.count);
  * 
- * // Using store effect
+ * // Using state effect
  * useStateEffect(action => action.type === 'INCREMENT', action => {
  *     console.log('Increment action dispatched:', action);
  * });
  */
 export function createState<T extends object>(initialValue: T): {
-    read: () => T;
-    write: (fn: Partial<T> | ((state: T) => Partial<T>)) => void;
+    getState: () => T;
+    setState: (fn: Partial<T> | ((state: T) => Partial<T>))=> void;
     dispatch: (action: any) => void;
     useStateEffect: (matcher: (action: any) => boolean, callback: (action: any) => void) => void;
     useSelector: <S>(selector: (state: T) => S) => S;
+    select:  <S>(selector: (state: T) => S) => S;
 } {
     let value = initialValue;
     const subscribers = new Set<(value: T) => void>();
     const dispatcher = new Set<(value: any) => void>();
-    const read = () => value as T;
-    const write = (fn: Partial<T> | ((state: T) => Partial<T>)):void => {
+    const getState = () => value as T;
+    const setState = (fn: Partial<T> | ((state: T) => Partial<T>)):void => {
         value = Object.assign({}, value, typeof fn ==='function'? fn(value): fn);
         Object.freeze(value);
         subscribers.forEach(subscriber => subscriber(value));
@@ -86,12 +89,12 @@ export function createState<T extends object>(initialValue: T): {
         return () => subscribers.delete(subscriber);
     };
     const useSelector = <S>(selector: (state: T) => S): S => {
-        const [value, setValue] = React.useState(selector(read()));
+        const [value, setValue] = React.useState(selector(getState()));
         React.useEffect(() => {
             const unsubscribe = subscribe((newValue: T) => {
                 const selectedValue = selector(newValue);
                 if (!shallowEqual(selectedValue, value)) {
-                    setValue((ols: S) => selectedValue);
+                    setValue((old: S) => selectedValue);
                 }
             });
             return () => {
@@ -124,6 +127,23 @@ export function createState<T extends object>(initialValue: T): {
             dispatcher.forEach(subscriber => subscriber(action));
         }
     };
-
-    return { read, write, dispatch, useStateEffect, useSelector };
+    const select = <S>(selector: (state: T) => S): S => {
+        const target = selector(value) as any
+        if(Array.isArray(target)){
+            return target.slice() as S;
+        }
+        else if(typeof target ==='object'){
+            return Object.keys(target).reduce((newObj, prop)=>{
+                if(Array.isArray(target[prop])){
+                    newObj[prop]= target[prop].slice();
+                }else{
+                    newObj[prop]= target[prop]
+                }
+                return newObj;
+            },{} as any) as S;
+        }
+        return target;
+    };
+    
+    return { getState, setState, dispatch, useStateEffect, useSelector, select };
 }
