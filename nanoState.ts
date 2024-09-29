@@ -66,7 +66,7 @@ function shallowEqual(objA: any, objB: any) {
  *     console.log('Increment action dispatched:', action);
  * });
  */
-export function createState<T extends object>(initialValue: T): {
+export function createState<T extends Record<string, any>>(initialValue: T): {
     getState: () => T;
     setState: (fn: Partial<T> | ((state: T) => Partial<T>)) => void;
     dispatch: (action: any) => void;
@@ -75,12 +75,12 @@ export function createState<T extends object>(initialValue: T): {
     select: <S>(selector: (state: T) => S) => S;
     subscribe: (subscriber: (value: T) => void) => () => void;
 } {
-    const currentState = initialValue;
+    let currentState = initialValue;
     const subscribers = new Set<(value: T) => void>();
     const dispatcher = new Set<(value: any) => void>();
     const getState = () => currentState as T;
     const setState = (fn: Partial<T> | ((state: T) => Partial<T>)): void => {
-        Object.assign(currentState, typeof fn === 'function' ? fn(currentState) : fn);
+        currentState = Object.assign({}, currentState, typeof fn === 'function' ? fn(currentState) : fn);
         subscribers.forEach(subscriber => subscriber(currentState));
     };
     const useSelector = <S>(selector: (state: T) => S): S => {
