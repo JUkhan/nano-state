@@ -108,8 +108,7 @@ export default {
         if (newTodo.trim()) {
             const todos = select(state => state.todos);
             todos.items.push({ id: Date.now(), text: newTodo.trim(), completed: false });
-            setState({ todos });
-            setState({ newTodo: "" });
+            setState({ todos,  newTodo: ""  });
         }
     },
     toggleTodo(id: number){

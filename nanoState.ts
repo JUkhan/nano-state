@@ -75,22 +75,22 @@ export function createState<T extends object>(initialValue: T): {
     select: <S>(selector: (state: T) => S) => S;
     subscribe: (subscriber: (value: T) => void) => () => void;
 } {
-    let value = initialValue;
+    const currentState = initialValue;
     const subscribers = new Set<(value: T) => void>();
     const dispatcher = new Set<(value: any) => void>();
-    const getState = () => value as T;
+    const getState = () => currentState as T;
     const setState = (fn: Partial<T> | ((state: T) => Partial<T>)): void => {
-        Object.assign(value, typeof fn === 'function' ? fn(value) : fn);
-        subscribers.forEach(subscriber => subscriber(value));
+        Object.assign(currentState, typeof fn === 'function' ? fn(currentState) : fn);
+        subscribers.forEach(subscriber => subscriber(currentState));
     };
     const useSelector = <S>(selector: (state: T) => S): S => {
-        const [, forcrRender] = React.useState(0);
-        const slice = React.useRef(selector(value))
+        const [, forceRender] = React.useState(0);
+        const slice = React.useRef(selector(currentState))
         React.useEffect(() => subscribe((newValue: T) => {
             const selectedValue = selector(newValue);
             if (!shallowEqual(selectedValue, slice.current)) {
-                forcrRender((prev: number) => (prev + 1) % Number.MAX_SAFE_INTEGER);
                 slice.current = selectedValue;
+                forceRender((prev: number) => (prev + 1) % Number.MAX_SAFE_INTEGER);
             }
         }), []);
         return slice.current;
@@ -118,7 +118,7 @@ export function createState<T extends object>(initialValue: T): {
         }
     };
     const select = <S>(selector: (state: T) => S): S => {
-        const target = selector(value) as any;
+        const target = selector(currentState) as any;
         if (Array.isArray(target)) {
             return target.slice() as S;
         }
