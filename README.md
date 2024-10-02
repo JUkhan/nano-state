@@ -17,8 +17,9 @@ export type AppState = {
             text: string;
             completed: boolean;
         }[];
+        newTodo:string;
     };
-    newTodo:string;
+    
 }
 
 export const {getState, setState, dispatch, useStateEffect, useSelector, select} = createState<AppState>({
@@ -29,8 +30,8 @@ export const {getState, setState, dispatch, useStateEffect, useSelector, select}
     todos: {
         visibility:'all',
         items: [],
-    },
-    newTodo:'',
+        newTodo:'',
+    } 
 });
 ```
 ## counterController
@@ -45,13 +46,10 @@ export default {
         setState({ counter });
     },
 
-    increment(by: number) {
-        return () => {
-            const counter = select(state => state.counter);
-            counter.count += by;
-            setState({ counter });
-            dispatch({ type: 'by', val: by });
-        }
+    increment() {
+        const counter = select(state => state.counter);
+        counter.count++;
+        setState({ counter });
     },
 
     asyncInc() {
@@ -83,7 +81,7 @@ const Counter: React.FC = () => {
             <h2 className="text-2xl font-bold">Counter: {count}</h2>
             <div className="flex space-x-4">
                 <Button onClick={counterController.decrement}>Decrease</Button>
-                <Button onClick={() => dispatch(counterController.increment(10))}>Increase</Button>
+                <Button onClick={counterController.increment}>Increase</Button>
                 <Button disabled={loading} onClick={counterController.asyncInc}>
                     {loading && <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />}
                     AsyncIncrease
@@ -123,8 +121,11 @@ export default {
             todos: { ...state.todos, visibility: newVisibility }
         }));
     },
-    todoSelector : (state: AppState) => state.todos,
-    newTodoSelector : (state: AppState) => state.newTodo
+    inputValueChange(newTodo:string){
+        setState(state=>({todos:{...state.todos, newTodo }}))
+    },
+    todoSelector : (state: AppState) => ({items:state.todos.items, visibility:state.todos.visibility}),
+    newTodoSelector : (state: AppState) => state.todos.newTodo
 }
 
 ```
@@ -140,13 +141,21 @@ import { Input } from '@/components/ui/input';
 import { setState, useSelector, useStateEffect } from '@/app/appState';
 import todoController from './todoController';
 
-const Todo: React.FC = () => {
+const AddTodo:React.FC= ()=>{
     const newTodo = useSelector(todoController.newTodoSelector);
-    const { items, visibility } = useSelector(todoController.todoSelector);
-    useStateEffect(action => action.type === 'by', action => {
-        console.log(`incremented by ${action.val}`);
-    })
+    return <div className="flex space-x-2">
+                <Input
+                    type="text"
+                    value={newTodo}
+                    onChange={(e) => todoController.inputValueChange( e.target.value)}
+                    placeholder="Add new todo"
+                />
+                <Button onClick={todoController.addTodo}>Add</Button>
+            </div>  
+}
 
+const Todo: React.FC = () => {
+    const { items, visibility } = useSelector(todoController.todoSelector);
     const filteredTodos = useMemo(() => items.filter(todo => {
         if (visibility === 'active') return !todo.completed;
         if (visibility === 'completed') return todo.completed;
@@ -156,15 +165,7 @@ const Todo: React.FC = () => {
     return (
         <div className="flex flex-col items-center space-y-4">
             <h2 className="text-2xl font-bold">Todo List</h2>
-            <div className="flex space-x-2">
-                <Input
-                    type="text"
-                    value={newTodo}
-                    onChange={(e) => setState({ newTodo: e.target.value })}
-                    placeholder="Add new todo"
-                />
-                <Button onClick={todoController.addTodo}>Add</Button>
-            </div>
+            <AddTodo/>
             <div className="flex space-x-2">
                 <Button onClick={() => todoController.setVisibility('all')}>All</Button>
                 <Button onClick={() => todoController.setVisibility('active')}>Active</Button>
