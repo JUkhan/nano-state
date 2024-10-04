@@ -16,9 +16,8 @@ export type AppState = {
             id: number;
             text: string;
             completed: boolean;
-            newTodo:string;
         }[];
-        
+        newTodo:string;
     };
     
 }
