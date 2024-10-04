@@ -16,8 +16,9 @@ export type AppState = {
             id: number;
             text: string;
             completed: boolean;
+            newTodo:string;
         }[];
-        newTodo:string;
+        
     };
     
 }
@@ -102,11 +103,11 @@ import { setState, select, type AppState } from '@/app/appState';
 
 export default {
     addTodo() {
-        const newTodo = select(state => state.newTodo);
-        if (newTodo.trim()) {
-            const todos = select(state => state.todos);
+        const todos = select(state => state.todos);
+        if (todos.newTodo.trim()) {
             todos.items.push({ id: Date.now(), text: newTodo.trim(), completed: false });
-            setState({ todos,  newTodo: ""  });
+            todos.newTodo = '';
+            setState({ todos });
         }
     },
     toggleTodo(id: number){
